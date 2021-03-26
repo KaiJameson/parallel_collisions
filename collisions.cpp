@@ -8,13 +8,12 @@
 #include <map>
 #include <algorithm>
 #include <vector>
+#include "Satellite.hpp"
 #define MCW MPI_COMM_WORLD
 using namespace std;
 
-struct Satellite {
-    int perigee;
-    int apogee;
-};
+
+const int EARTH_RADIUS = 6370; //kilometers
 
 int main(int argc, char **argv){
   MPI_Init(&argc, &argv);
