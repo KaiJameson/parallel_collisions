@@ -1,11 +1,10 @@
 #pragma once
-
 class Satellite {
   public:
     Satellite(int perigee, int apogee);
     int getApogee();
     int getPerigee();
-    void getPosition(int time, double position[]);
+    void getPosition(int time, int position[]);
   private:
     int m_perigee;
     int m_apogee;
@@ -20,6 +19,8 @@ class Satellite {
     double meanAnomaly(int time);
     double eccentricAnomaly(double mAnomaly); //doing 100 iterations because there is no closed form solution
     double trueAnomaly(double eAnomaly);
+    int altitude(double eAnomaly);
+
 };
 
 
