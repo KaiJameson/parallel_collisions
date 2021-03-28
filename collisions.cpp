@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
 
   int numSats = 100; // number of satellites per processor
   int coords[2]; // coord array for sending sat positions
-  int cycles = 100; // number of time positions per run of the program
+  int cycles = 365; // number of time positions per run of the program
 
   if (rank == 0) {
     for (int i = 0; i < cycles; ++i) {
@@ -92,6 +92,9 @@ int main(int argc, char **argv) {
         sats[j].getPosition(i, coords);
         MPI_Send(coords, 2, MPI_INT, 0, 0, MCW); // send position back to p0 for collision detection
       }
+      //get all collision information
+      //make the new satellites/split old ones
+      //MPI_RECV() //end flag
     }
     //receive the satellite information from rank 0
     
