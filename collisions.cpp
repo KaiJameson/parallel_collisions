@@ -77,9 +77,14 @@ int main(int argc, char **argv) {
     for (int i = 0; i < numSats; ++i) {
       float perigee = randomFloat(minOrbit, maxOrbit);
       float apogee = randomFloat(minOrbit, maxOrbit);
-      float parigeeAngle = randomFloat(0, 2*M_PI);
+      float perigeeAngle = randomFloat(0, 2*M_PI);
       float startingAngle = randomFloat(0, 2*M_PI);
-      sats[i] = Satellite(perigee, apogee, parigeeAngle, startingAngle); // satSize??? - would not be an actual size, but a unit for collision dist
+      if (perigee > apogee) {
+        float tmp = apogee;
+        apogee = perigee;
+        perigee = tmp;
+      }
+      sats[i] = Satellite(perigee+EARTH_RADIUS, apogee+EARTH_RADIUS, perigeeAngle, startingAngle); // satSize??? - would not be an actual size, but a unit for collision dist
     }
 
     for (int i = 0; i < cycles; ++i) {

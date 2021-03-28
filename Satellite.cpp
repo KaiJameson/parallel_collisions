@@ -2,28 +2,25 @@
 #include <cmath>
 #include <cstdint>
 #include <climits>
+#include <iostream>
 //g as gravitational constant from https://en.wikipedia.org/wiki/Gravitational_constant
 // const double G = 6.674 * pow(10,-11);
 //should be 10^24 instead of 10^18
 // const std::uint64_t M_EARTH = 5.972 * pow(10,24);
 const std::uint64_t GM = 3.983 * pow(10,14);
 const int EARTH_RADIUS = 6370;
-Satellite::Satellite(int perigee, int apogee) {
+Satellite::Satellite(float perigee, float apogee, float perigeeAngle, float startingAngle) {
   m_perigee = perigee;
   m_apogee = apogee;
+  m_perigeeAngle = perigeeAngle;
+  m_startingAngle = startingAngle;
   setSMA();
   setEccentricity();
   setMeanMotion();
   setOrbitalPeriod();
 }
-int Satellite::getApogee() {
-  return m_apogee;
-}
-int Satellite::getPerigee() {
-  return m_perigee;
-}
 void Satellite::setEccentricity() {
-  m_eccentricity = static_cast<double>(m_apogee-m_perigee) / static_cast<double>(m_apogee+m_perigee);
+  m_eccentricity = (m_apogee-m_perigee) / (m_apogee+m_perigee);
 }
 void Satellite::setSMA() {
   m_sma = (m_apogee+m_perigee)/2;
@@ -32,7 +29,7 @@ void Satellite::setMeanMotion() {
   m_meanMotion = sqrt(static_cast<double>(GM) / pow(m_sma,3));
 }
 void Satellite::setOrbitalPeriod() {
-  m_orbitalPeriod = (2*M_PI) * sqrt( static_cast<double>(pow(m_sma,3)) / (GM));
+  m_orbitalPeriod = static_cast<int>((2*M_PI) * sqrt(pow(m_sma*pow(10,3),3) / (GM)));
 }
 double Satellite::meanAnomaly(int time) {
   return m_meanMotion * time;
@@ -47,17 +44,17 @@ double Satellite::eccentricAnomaly(double mAnomaly) {
 double Satellite::trueAnomaly(double eAnomaly) {
   return acos((cos(eAnomaly)-m_eccentricity)/(1-(m_eccentricity*cos(eAnomaly))));
 }
-int Satellite::altitude(double eAnomaly) {
+double Satellite::altitude(double eAnomaly) {
   return (m_sma * (1-(m_eccentricity * cos(eAnomaly)))) - EARTH_RADIUS;
 }
 void Satellite::getPosition(int time, int position[]) {
   //working on understanding this part
-  double mAnomaly = meanAnomaly(time);
+  double mAnomaly = meanAnomaly(time%m_orbitalPeriod);
   double eAnomaly = eccentricAnomaly(mAnomaly);
   double tAnomaly = trueAnomaly(eAnomaly);
-  int alt = altitude(eAnomaly);
-  position[0] = static_cast<int>(cos(tAnomaly)*alt);
-  position[1] = static_cast<int>(sin(tAnomaly)*alt);
+  double alt = altitude(eAnomaly);
+  position[0] = static_cast<int>(cos(tAnomaly+m_perigeeAngle+m_startingAngle)*alt);
+  position[1] = static_cast<int>(sin(tAnomaly+m_perigeeAngle+m_startingAngle)*alt);
 }
 
 
