@@ -78,7 +78,7 @@ void Satellite::getPosition(int time, int position[]) {
   float x = static_cast<int>(cos(tAnomaly+m_startingAngle)*alt);
   float y = static_cast<int>(sin(tAnomaly+m_startingAngle)*alt);
   //create rotation matrix
-  float transformation[2][2] = {
+  double transformation[2][2] = {
     {cos(m_perigeeAngle), sin(m_perigeeAngle)},
     {-sin(m_perigeeAngle), cos(m_perigeeAngle)}
   };

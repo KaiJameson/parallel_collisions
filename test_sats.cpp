@@ -30,15 +30,15 @@ int main() {
   std::cout << "apogee " << apogee << std::endl;
   std::cout << "perigee angle " << perigeeAngle << std::endl;
   std::cout << "starting angle " << startingAngle << std::endl;
-  Satellite sat = Satellite(perigee+EARTH_RADIUS, apogee+EARTH_RADIUS, perigeeAngle, startingAngle);
+  Satellite sat = Satellite(perigee+EARTH_RADIUS, apogee+EARTH_RADIUS, perigeeAngle, startingAngle, 10);
   int secsInDay = 60*60*24;
   int position[2];
   for (int i=0; i<365; i++) {
     sat.getPosition(i*secsInDay, position);
     std::cout << "Position on day " << i << " is " << position[0] << "," << position[1] << std::endl;
-    if (tooLarge(apogee,position[0],position[1]) || tooSmall(perigee, position[0], position[1])) {
-      std::cout << "error at day " << i << std::endl;
-    }
+    // if (tooLarge(apogee,position[0],position[1]) || tooSmall(perigee, position[0], position[1])) {
+      // std::cout << "error at day " << i << std::endl;
+    // }
   }
   return 0;
 }
