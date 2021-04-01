@@ -35,17 +35,6 @@ bool collision(float point1[], float point2[], float threshold) {
   return dist < threshold*threshold; // square threshold instead of using sqrt (which has poor performance)
 }
 
-int getSatNum(int rank, int size, int num) {
-  return rank*size + num;
-}
-
-int reverseSatRank(int satNum, int size) {
-  return satNum / size;
-}
-
-int reverseSatNum(int satNum, int size) {
-  return satNum % size;
-}
 
 string coordToString(int arr[]) {
   return to_string(arr[0]) + ", " + to_string(arr[1]);
