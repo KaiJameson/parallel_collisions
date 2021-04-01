@@ -1,13 +1,15 @@
 #pragma once
 class Satellite {
   public:
-    Satellite(float perigee, float apogee, float perigeeAngle, float startingAngle);
+    Satellite(float perigee, float apogee, float perigeeAngle, float startingAngle, int size);
     float getApogee() {return m_apogee;}
     float getPerigee() {return m_perigee;}
     float getPerigeeAngle() {return m_perigeeAngle;}
     float getStartingAngle() {return m_startingAngle;}
     void getPosition(int time, int position[]);
+    void crash(Satellite crashes[]);
   private:
+    int m_size;
     float m_perigee;
     float m_apogee;
     float m_perigeeAngle;
@@ -16,6 +18,7 @@ class Satellite {
     double m_eccentricity;
     double m_meanMotion;
     int m_orbitalPeriod; //in seconds
+    double m_lastTAnomaly;
     void setEccentricity();
     void setSMA(); //semi major axis
     void setMeanMotion();
