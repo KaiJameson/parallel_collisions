@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
   int numSats = 100; // number of satellites per processor
   int coords[2]; // coord array for sending sat positions
   int cycles = 365; // number of time positions per run of the program
-
+  int collisionCount = 0;
   if (rank == 0) {
     for (int i = 0; i < cycles; ++i) {
       map<string, int> locations; // map for detecting collisions
@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
           MPI_Recv(coords, 2, MPI_INT, j, i, MCW, MPI_STATUS_IGNORE);
           string coordString = coordToString(coords);
           if (locations.count(coordString) != 0) {
-            cout << "COLLISION" << endl;
+            collisionCount ++;
             // collision occurred, split satellite up and store collision somewhere
             // if size is used, it would be easier to send a 'split' flag back to the processor with the satellite
             // since the original satellite would also have to be modified (to be smaller) or removed
@@ -70,6 +70,7 @@ int main(int argc, char **argv) {
         }
       }
     }
+    cout << "There were " << collisionCount << " collisions in the year" << endl;
   }
   else {
     // create satellites
