@@ -15,6 +15,11 @@ using namespace std;
 
 const int EARTH_RADIUS = 6370; //kilometers
 
+struct SatId {
+    int rank;
+    int num;
+};
+
 // generates random val from 0 to 
 float randomFloat(float min, float max) {
   float range = max - min;
@@ -60,7 +65,7 @@ int main(int argc, char **argv) {
   int collisionCount = 0;
   if (rank == 0) {
     for (int i = 0; i < cycles; ++i) {
-      map<string, int> locations; // map for detecting collisions
+      map<string, SatId> locations; // map for detecting collisions
       for (int j = 1; j < size; ++j) {
         for (int k = 0; k < numSats; ++k) {
           //flagging as i to make sure that things are on the same cycle
@@ -76,7 +81,10 @@ int main(int argc, char **argv) {
           else {
             //when the processes have a different number of satellites, this formula will break
             //actually isn't this formula always broken when k > size?
-            locations[coordString] = getSatNum(j, size, k); // add sat location to map
+            SatId si;
+            si.rank = j;
+            si.num = k;
+            locations[coordString] = si; // add sat location to map
           }
         }
       }
