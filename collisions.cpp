@@ -34,6 +34,14 @@ int getSatNum(int rank, int size, int num) {
   return rank*size + num;
 }
 
+int reverseSatRank(int satNum, int size) {
+  return satNum / size;
+}
+
+int reverseSatNum(int satNum, int size) {
+  return satNum % size;
+}
+
 string coordToString(int arr[]) {
   return to_string(arr[0]) + ", " + to_string(arr[1]);
 }
@@ -63,8 +71,11 @@ int main(int argc, char **argv) {
             // collision occurred, split satellite up and store collision somewhere
             // if size is used, it would be easier to send a 'split' flag back to the processor with the satellite
             // since the original satellite would also have to be modified (to be smaller) or removed
+
           }
           else {
+            //when the processes have a different number of satellites, this formula will break
+            //actually isn't this formula always broken when k > size?
             locations[coordString] = getSatNum(j, size, k); // add sat location to map
           }
         }
