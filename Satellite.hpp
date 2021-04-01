@@ -2,6 +2,7 @@
 class Satellite {
   public:
     Satellite(float perigee, float apogee, float perigeeAngle, float startingAngle, int size);
+    Satellite() { m_size = 1; }
     float getApogee() {return m_apogee;}
     float getPerigee() {return m_perigee;}
     float getPerigeeAngle() {return m_perigeeAngle;}

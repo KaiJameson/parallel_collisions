@@ -34,7 +34,7 @@ int getSatNum(int rank, int size, int num) {
   return rank*size + num;
 }
 
-int coordToString(int arr[]) {
+string coordToString(int arr[]) {
   return to_string(arr[0]) + ", " + to_string(arr[1]);
 }
 
@@ -53,17 +53,19 @@ int main(int argc, char **argv) {
   if (rank == 0) {
     for (int i = 0; i < cycles; ++i) {
       map<string, int> locations; // map for detecting collisions
-      for (int j = 0; j < size; ++j) {
+      for (int j = 1; j < size; ++j) {
         for (int k = 0; k < numSats; ++k) {
-          MPI_Recv(coords, 2, MPI_INT, j, 0, MCW, MPI_STATUS_IGNORE);
+          //flagging as i to make sure that things are on the same cycle
+          MPI_Recv(coords, 2, MPI_INT, j, i, MCW, MPI_STATUS_IGNORE);
           string coordString = coordToString(coords);
-          if (map.count(coordString) != 0) {
+          if (locations.count(coordString) != 0) {
+            cout << "COLLISION" << endl;
             // collision occurred, split satellite up and store collision somewhere
             // if size is used, it would be easier to send a 'split' flag back to the processor with the satellite
             // since the original satellite would also have to be modified (to be smaller) or removed
           }
           else {
-            map[coordString] = getSatNum(rank, size, k); // add sat location to map
+            locations[coordString] = getSatNum(j, size, k); // add sat location to map
           }
         }
       }
@@ -73,7 +75,7 @@ int main(int argc, char **argv) {
     // create satellites
     float minOrbit = 180;
     float maxOrbit = 2000;
-    Satellite sats[numSats]
+    Satellite sats[numSats];
     for (int i = 0; i < numSats; ++i) {
       float perigee = randomFloat(minOrbit, maxOrbit);
       float apogee = randomFloat(minOrbit, maxOrbit);
@@ -84,13 +86,14 @@ int main(int argc, char **argv) {
         apogee = perigee;
         perigee = tmp;
       }
-      sats[i] = Satellite(perigee+EARTH_RADIUS, apogee+EARTH_RADIUS, perigeeAngle, startingAngle); // satSize??? - would not be an actual size, but a unit for collision dist
+      sats[i] = Satellite(perigee+EARTH_RADIUS, apogee+EARTH_RADIUS, perigeeAngle, startingAngle, 10); // satSize??? - would not be an actual size, but a unit for collision dist
     }
 
     for (int i = 0; i < cycles; ++i) {
       for (int j = 0; j < numSats; ++j) {
         sats[j].getPosition(i, coords);
-        MPI_Send(coords, 2, MPI_INT, 0, 0, MCW); // send position back to p0 for collision detection
+        //tagging as i to make sure the cycle information is understood
+        MPI_Send(coords, 2, MPI_INT, 0, i, MCW); // send position back to p0 for collision detection
       }
       //get all collision information
       //make the new satellites/split old ones
