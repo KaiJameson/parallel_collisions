@@ -63,11 +63,11 @@ int main(int argc, char **argv) {
   MPI_Comm_size(MCW, &size);
   srand(rank);
 
-  int numSats = 100;      // number of satellites per processor
+  int numSats = 10;      // number of satellites per processor
   int coords[3];          // coord array for sending sat positions and size info
   int cycles = 365;       // number of time positions per run of the program
   int collisionCount = 0;
-  int startSize = 10;
+  int startSize = 1;
   int splitVal = 2;
 
   if (rank == 0) {
@@ -81,9 +81,10 @@ int main(int argc, char **argv) {
       fout.open("sats.txt", ios::app);
       fout << "\"["; 
       for (int j = 1; j < size; ++j) {
+        MPI_Recv(&numSats, 1, MPI_INT, j, 0, MCW, MPI_STATUS_IGNORE);
+        cout << "on cycle " << i << " rank " << j << " is sending " << numSats << " sats" << endl;
         for (int k = 0; k < numSats; ++k) {
-          // flagging as i to make sure that things are on the same cycle
-          MPI_Recv(coords, 3, MPI_INT, j, i, MCW, MPI_STATUS_IGNORE);
+          MPI_Recv(coords, 3, MPI_INT, j, 0, MCW, MPI_STATUS_IGNORE);
           string coordString = coordToString(coords);
           fout << "[" << coords[0] << "," << coords[1] << "," << coords[2] << "]";
           if (j != size -1 || k != numSats-1) {
@@ -92,13 +93,13 @@ int main(int argc, char **argv) {
           // if collision occurred, break up satellites
           if (locations.count(coordString) != 0) {
             collisionCount++;
-            data = k;
             // if a collision has already occurred at this location, break up both the first and second satellite (o/w second only)
-            if (collisions[coordString]) {
+            if (!collisions[coordString]) {
               SatId oldSat = locations[coordString];
               data = oldSat.num;
               MPI_Send(&data, 1, MPI_INT, oldSat.rank, 0, MCW);
             }
+            data = k;
             MPI_Send(&data, 1, MPI_INT, j, 0, MCW);
             collisions[coordString] = true;
             // best (?) option for fixing sat size: new map with fill% at each location
@@ -111,6 +112,7 @@ int main(int argc, char **argv) {
             si.rank = j;
             si.num = k;
             locations[coordString] = si; // add sat location to map
+            collisions[coordString] = false;
           }
         }
         data = -1;
@@ -140,11 +142,13 @@ int main(int argc, char **argv) {
     }
 
     for (int i = 0; i < cycles; ++i) {
-      for (int j = 0; j < numSats; ++j) {
+      int vecSize = sats.size();
+      MPI_Send(&vecSize, 1, MPI_INT, 0, 0, MCW);
+      for (int j = 0; j < sats.size(); ++j) {
         sats[j].getPosition(i, coords);
         coords[2] = sats[j].getSize();
         // tagging as i to make sure the cycle information is understood
-        MPI_Send(coords, 3, MPI_INT, 0, i, MCW); // send position back to p0 for collision detection
+        MPI_Send(coords, 3, MPI_INT, 0, 0, MCW); // send position back to p0 for collision detection
       }
       while (true) {
         int data;
