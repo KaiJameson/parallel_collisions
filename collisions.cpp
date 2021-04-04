@@ -73,9 +73,12 @@ int main(int argc, char **argv) {
   if (rank == 0) {
     fstream fout;
     fout.open("sats.txt", ios::out);
+    fout.close();
     for (int i = 0; i < cycles; ++i) {
       map<string, SatId> locations; // map for detecting collision location
       map<string, bool> collisions; // map for detecting repeated collisions
+      fstream fout;
+      fout.open("sats.txt", ios::app);
       fout << "\"["; 
       for (int j = 1; j < size; ++j) {
         for (int k = 0; k < numSats; ++k) {
@@ -83,7 +86,7 @@ int main(int argc, char **argv) {
           MPI_Recv(coords, 3, MPI_INT, j, i, MCW, MPI_STATUS_IGNORE);
           string coordString = coordToString(coords);
           fout << "[" << coords[0] << "," << coords[1] << "," << coords[2] << "]";
-          if (k != numSats-1) {
+          if (j != size -1 || k != numSats-1) {
             fout << ",";            
           }
           // if collision occurred, break up satellites
@@ -114,8 +117,8 @@ int main(int argc, char **argv) {
         MPI_Send(&data, 1, MPI_INT, j, 0, MCW);
       }
       fout << "]\"" << endl;
+      fout.close();
     }
-    fout.close();
     cout << "There were " << collisionCount << " collisions in the year" << endl;
   }
   else {
@@ -151,7 +154,8 @@ int main(int argc, char **argv) {
         }
         else {
           // reduce size of old satellite and add new satellite fragments
-          int newSize = sats[data].getSize() * splitVal;
+          int oldSize = sats[data].getSize();
+          int newSize = oldSize + splitVal;
           sats[data].setSize(newSize);
           Satellite temp = sats[data];
           for (int k = 0; k < splitVal; ++k) {

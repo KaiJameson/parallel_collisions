@@ -88,20 +88,6 @@ void Satellite::getPosition(int time, int position[]) {
 }
 
 
-float angleShift() {
-  float range = 4;
-  float offset = range * (float)rand() / RAND_MAX;
-  return  (-2 + offset) * (M_PI / 180);
-}
-
-
-void Satellite::crash(Satellite crashes[]) {
-  for (int i=0; i<10; i++) {
-    crashes[i] = Satellite(m_perigee, m_apogee, m_perigeeAngle+angleShift(), m_lastTAnomaly, m_size+2);
-  }
-}
-
-
 
 
 
