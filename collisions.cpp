@@ -54,6 +54,42 @@ void randomShift(float &perigee, float &apogee) {
   if (perigee > apogee) swap(perigee, apogee);
 }
 
+//quicksort algorithm pulled from https://www.thepolyglotdeveloper.com/2019/04/sort-vector-integers-quicksort-algorithm-cpp/
+int partition(vector<int> &values, int left, int right) {
+  int pivotIndex = left + (right-left) / 2;
+  int pivotValue = values[pivotIndex];
+  int i = left, j = right;
+  int temp;
+  while (i <= j) {
+    while (values[i] < pivotValue) {
+      i++;
+    }
+    while (values[j] > pivotValue) {
+      j++;
+    }
+    if (i<= j) {
+      temp = values[i];
+      values[i] = values[j];
+      values[j] = temp;
+      i++;
+      j--;
+    }
+  }
+  return i;
+}
+void quicksort(vector<int> &values, int left, int right) {
+  if (left<right) {
+    int pivotIndex = partition(values, left, right);
+    quicksort(values,left, pivotIndex-1);
+    quicksort(values,pivotIndex,right);
+  }
+}
+
+
+
+
+
+
 int main(int argc, char **argv) {
   MPI_Init(&argc, &argv);
   int rank, size;
@@ -81,6 +117,9 @@ int main(int argc, char **argv) {
       fout.open("sats.txt", ios::app);
       fout << "\"["; 
       for (int j = 1; j < size; ++j) {
+        if (i > 270) {
+          cout << "waiting on rank#" << j << " to send size for cycle#" << i << endl;
+        }
         MPI_Recv(&numSats, 1, MPI_INT, j, 0, MCW, MPI_STATUS_IGNORE);
         cout << "on cycle " << i << " rank " << j << " is sending " << numSats << " sats" << endl;
         for (int k = 0; k < numSats; ++k) {
@@ -115,8 +154,13 @@ int main(int argc, char **argv) {
             collisions[coordString] = false;
           }
         }
+        if (i > 270) {
+          cout << "rank#" << j << " has finished sending for cycle#" << i << endl;
+        }
+      }
+      for (int sendRank = 1; sendRank < size; sendRank++) {
         data = -1;
-        MPI_Send(&data, 1, MPI_INT, j, 0, MCW);
+        MPI_Send(&data, 1, MPI_INT, sendRank, 0, MCW);
       }
       fout << "]\"" << endl;
       fout.close();
@@ -150,6 +194,7 @@ int main(int argc, char **argv) {
         // tagging as i to make sure the cycle information is understood
         MPI_Send(coords, 3, MPI_INT, 0, 0, MCW); // send position back to p0 for collision detection
       }
+      vector<int> satNums;
       while (true) {
         int data;
         MPI_Recv(&data, 1, MPI_INT, 0, 0, MCW, MPI_STATUS_IGNORE);
@@ -157,6 +202,7 @@ int main(int argc, char **argv) {
           break;
         }
         else {
+          satNums.push_back(data);
           // reduce size of old satellite and add new satellite fragments
           int oldSize = sats[data].getSize();
           int newSize = oldSize + splitVal;
@@ -168,6 +214,11 @@ int main(int argc, char **argv) {
             randomShift(perigee, apogee);
             sats.push_back(Satellite(perigee+EARTH_RADIUS, apogee+EARTH_RADIUS, temp.getPerigeeAngle(), temp.getLastTAnomaly(), newSize));
           }
+        }
+      }
+      if (satNums.size() > 0) {
+        for (int vecI = satNums.size()-1; vecI >= 0; vecI--) {
+          sats.erase(sats.begin()+satNums[vecI]);
         }
       }
     }
