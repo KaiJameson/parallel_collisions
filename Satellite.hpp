@@ -7,6 +7,8 @@ class Satellite {
     float getPerigee() {return m_perigee;}
     float getPerigeeAngle() {return m_perigeeAngle;}
     float getStartingAngle() {return m_startingAngle;}
+    void setSize(int newSize) {m_size = newSize;}
+    int getSize() {return m_size;}
     void getPosition(int time, int position[]);
     void crash(Satellite crashes[]);
   private:

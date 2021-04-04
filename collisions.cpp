@@ -113,7 +113,7 @@ int main(int argc, char **argv) {
     // create satellites
     float minOrbit = 180;
     float maxOrbit = 2000;
-    vector<Satellite> sats[numSats];
+    vector<Satellite> sats;
     for (int i = 0; i < numSats; ++i) {
       float perigee = randomFloat(minOrbit, maxOrbit);
       float apogee = randomFloat(minOrbit, maxOrbit);
@@ -124,7 +124,7 @@ int main(int argc, char **argv) {
         apogee = perigee;
         perigee = tmp;
       }
-      sats[i] = Satellite(perigee+EARTH_RADIUS, apogee+EARTH_RADIUS, perigeeAngle, startingAngle, 10);
+      sats.push_back(Satellite(perigee+EARTH_RADIUS, apogee+EARTH_RADIUS, perigeeAngle, startingAngle, 10));
     }
 
     for (int i = 0; i < cycles; ++i) {
@@ -134,7 +134,8 @@ int main(int argc, char **argv) {
         MPI_Send(coords, 2, MPI_INT, 0, i, MCW); // send position back to p0 for collision detection
       }
       while (true) {
-        MPI_Recv(data, 1, MPI_INT, 0, 0, MCW, MPI_STATUS_IGNORE);
+        int data;
+        MPI_Recv(&data, 1, MPI_INT, 0, 0, MCW, MPI_STATUS_IGNORE);
         if (data == -1) {
           break;
         }
@@ -147,7 +148,7 @@ int main(int argc, char **argv) {
             float perigee = temp.getPerigee() - EARTH_RADIUS;
             float apogee = temp.getApogee() - EARTH_RADIUS;
             randomShift(perigee, apogee);
-            sats.push(Satellite(perigee+EARTH_RADIUS, apogee+EARTH_RADIUS, temp.getPerigeeAngle(), temp.getStartingAngle(), newSize));
+            sats.push_back(Satellite(perigee+EARTH_RADIUS, apogee+EARTH_RADIUS, temp.getPerigeeAngle(), temp.getStartingAngle(), newSize));
           }
         }
       }
