@@ -10,6 +10,7 @@ class Satellite {
     void setSize(int newSize) {m_size = newSize;}
     int getSize() {return m_size;}
     void getPosition(int time, int position[]);
+    double getLastTAnomaly() {return m_lastTAnomaly;}
     void crash(Satellite crashes[]);
   private:
     int m_size;

@@ -64,21 +64,28 @@ int main(int argc, char **argv) {
   srand(rank);
 
   int numSats = 100;      // number of satellites per processor
-  int coords[2];          // coord array for sending sat positions
+  int coords[3];          // coord array for sending sat positions and size info
   int cycles = 365;       // number of time positions per run of the program
   int collisionCount = 0;
   int startSize = 10;
-  int splitVal = 10;
+  int splitVal = 2;
 
   if (rank == 0) {
+    fstream fout;
+    fout.open("sats.txt", ios::out);
     for (int i = 0; i < cycles; ++i) {
       map<string, SatId> locations; // map for detecting collision location
       map<string, bool> collisions; // map for detecting repeated collisions
+      fout << "\"["; 
       for (int j = 1; j < size; ++j) {
         for (int k = 0; k < numSats; ++k) {
           // flagging as i to make sure that things are on the same cycle
-          MPI_Recv(coords, 2, MPI_INT, j, i, MCW, MPI_STATUS_IGNORE);
+          MPI_Recv(coords, 3, MPI_INT, j, i, MCW, MPI_STATUS_IGNORE);
           string coordString = coordToString(coords);
+          fout << "[" << coords[0] << "," << coords[1] << "," << coords[2] << "]";
+          if (k != numSats-1) {
+            fout << ",";            
+          }
           // if collision occurred, break up satellites
           if (locations.count(coordString) != 0) {
             collisionCount++;
@@ -106,7 +113,9 @@ int main(int argc, char **argv) {
         data = -1;
         MPI_Send(&data, 1, MPI_INT, j, 0, MCW);
       }
+      fout << "]\"" << endl;
     }
+    fout.close();
     cout << "There were " << collisionCount << " collisions in the year" << endl;
   }
   else {
@@ -130,8 +139,9 @@ int main(int argc, char **argv) {
     for (int i = 0; i < cycles; ++i) {
       for (int j = 0; j < numSats; ++j) {
         sats[j].getPosition(i, coords);
+        coords[2] = sats[j].getSize();
         // tagging as i to make sure the cycle information is understood
-        MPI_Send(coords, 2, MPI_INT, 0, i, MCW); // send position back to p0 for collision detection
+        MPI_Send(coords, 3, MPI_INT, 0, i, MCW); // send position back to p0 for collision detection
       }
       while (true) {
         int data;
@@ -141,14 +151,14 @@ int main(int argc, char **argv) {
         }
         else {
           // reduce size of old satellite and add new satellite fragments
-          int newSize = sats[data].getSize() / splitVal;
+          int newSize = sats[data].getSize() * splitVal;
           sats[data].setSize(newSize);
           Satellite temp = sats[data];
           for (int k = 0; k < splitVal; ++k) {
             float perigee = temp.getPerigee() - EARTH_RADIUS;
             float apogee = temp.getApogee() - EARTH_RADIUS;
             randomShift(perigee, apogee);
-            sats.push_back(Satellite(perigee+EARTH_RADIUS, apogee+EARTH_RADIUS, temp.getPerigeeAngle(), temp.getStartingAngle(), newSize));
+            sats.push_back(Satellite(perigee+EARTH_RADIUS, apogee+EARTH_RADIUS, temp.getPerigeeAngle(), temp.getLastTAnomaly(), newSize));
           }
         }
       }
