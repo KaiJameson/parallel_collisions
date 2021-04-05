@@ -89,8 +89,6 @@ void quicksort(vector<int> &values, int left, int right) {
 
 
 
-
-
 int main(int argc, char **argv) {
   MPI_Init(&argc, &argv);
   int rank, size;
@@ -216,7 +214,7 @@ int main(int argc, char **argv) {
           for (int k = 0; k < splitAmt; ++k) {
             float perigee = temp.getPerigee() - EARTH_RADIUS;
             float apogee = temp.getApogee() - EARTH_RADIUS;
-            // randomShift(perigee, apogee);
+            randomShift(perigee, apogee);
             sats.push_back(Satellite(perigee+EARTH_RADIUS, apogee+EARTH_RADIUS, temp.getPerigeeAngle(), temp.getLastTAnomaly(), newSize));
           }
         }
