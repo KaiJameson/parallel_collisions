@@ -97,12 +97,12 @@ int main(int argc, char **argv) {
   MPI_Init(&argc, &argv);
   int rank, size;
   int data;
-  int seeds[8] = {2,4,7,13,12,52,47,64};
+  int seeds[8] = {0,2,7,13,12,52,47,64};
   MPI_Status mystatus;
   MPI_Comm_rank(MCW, &rank);
   MPI_Comm_size(MCW, &size);
   srand(seeds[rank]);
-  int numSats = 30;      // number of satellites per processor
+  int numSats = 100;      // number of satellites per processor
   int coords[3];          // coord array for sending sat positions and size info
   int cycles = 365;       // number of time positions per run of the program
   int collisionCount = 0;
