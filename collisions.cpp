@@ -85,7 +85,11 @@ void quicksort(vector<int> &values, int left, int right) {
     quicksort(values,pivotIndex,right);
   }
 }
-
+float angleShift() {
+  float range = 6.0;
+  float offset = range * (float) rand() / RAND_MAX;
+  return ((-1*range/2)*offset)*(M_PI/180);
+}
 
 
 
@@ -98,7 +102,7 @@ int main(int argc, char **argv) {
   MPI_Comm_rank(MCW, &rank);
   MPI_Comm_size(MCW, &size);
   srand(seeds[rank]);
-  int numSats = 10;      // number of satellites per processor
+  int numSats = 30;      // number of satellites per processor
   int coords[3];          // coord array for sending sat positions and size info
   int cycles = 365;       // number of time positions per run of the program
   int collisionCount = 0;
@@ -215,7 +219,7 @@ int main(int argc, char **argv) {
             float perigee = temp.getPerigee() - EARTH_RADIUS;
             float apogee = temp.getApogee() - EARTH_RADIUS;
             randomShift(perigee, apogee);
-            sats.push_back(Satellite(perigee+EARTH_RADIUS, apogee+EARTH_RADIUS, temp.getPerigeeAngle(), temp.getLastTAnomaly(), newSize));
+            sats.push_back(Satellite(perigee+EARTH_RADIUS, apogee+EARTH_RADIUS, temp.getPerigeeAngle()+angleShift(), temp.getLastTAnomaly(), newSize));
           }
         }
       }
