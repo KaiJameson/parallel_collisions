@@ -9,6 +9,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <ctime>
 #include "Satellite.hpp"
 #define MCW MPI_COMM_WORLD
 using namespace std;
@@ -94,17 +95,18 @@ int main(int argc, char **argv) {
   MPI_Init(&argc, &argv);
   int rank, size;
   int data;
+  int seeds[8] = {2,4,7,13,12,52,47,64};
   MPI_Status mystatus;
   MPI_Comm_rank(MCW, &rank);
   MPI_Comm_size(MCW, &size);
-  srand(rank);
-
+  srand(seeds[rank]);
   int numSats = 10;      // number of satellites per processor
   int coords[3];          // coord array for sending sat positions and size info
   int cycles = 365;       // number of time positions per run of the program
   int collisionCount = 0;
-  int startSize = 1;
-  int splitVal = 2;
+  int startSize = 10;
+  int splitAmt = 2;
+  int splitVal = 1;
 
   if (rank == 0) {
     fstream fout;
@@ -117,9 +119,9 @@ int main(int argc, char **argv) {
       fout.open("sats.txt", ios::app);
       fout << "\"["; 
       for (int j = 1; j < size; ++j) {
-        if (i > 270) {
-          cout << "waiting on rank#" << j << " to send size for cycle#" << i << endl;
-        }
+        // if (i > 270) {
+          // cout << "waiting on rank#" << j << " to send size for cycle#" << i << endl;
+        // }
         MPI_Recv(&numSats, 1, MPI_INT, j, 0, MCW, MPI_STATUS_IGNORE);
         cout << "on cycle " << i << " rank " << j << " is sending " << numSats << " sats" << endl;
         for (int k = 0; k < numSats; ++k) {
@@ -135,8 +137,8 @@ int main(int argc, char **argv) {
             // if a collision has already occurred at this location, break up both the first and second satellite (o/w second only)
             if (!collisions[coordString]) {
               SatId oldSat = locations[coordString];
-              data = oldSat.num;
-              MPI_Send(&data, 1, MPI_INT, oldSat.rank, 0, MCW);
+              // cout << "collision between rank#" << oldSat.rank << " and rank#" << j << endl;
+              MPI_Send(&oldSat.num, 1, MPI_INT, oldSat.rank, 0, MCW);
             }
             data = k;
             MPI_Send(&data, 1, MPI_INT, j, 0, MCW);
@@ -154,9 +156,9 @@ int main(int argc, char **argv) {
             collisions[coordString] = false;
           }
         }
-        if (i > 270) {
-          cout << "rank#" << j << " has finished sending for cycle#" << i << endl;
-        }
+        // if (i > 270) {
+          // cout << "rank#" << j << " has finished sending for cycle#" << i << endl;
+        // }
       }
       for (int sendRank = 1; sendRank < size; sendRank++) {
         data = -1;
@@ -205,13 +207,16 @@ int main(int argc, char **argv) {
           satNums.push_back(data);
           // reduce size of old satellite and add new satellite fragments
           int oldSize = sats[data].getSize();
-          int newSize = oldSize + splitVal;
+          int newSize = oldSize - splitVal;
+          if (newSize < 1) {
+            newSize = 1;
+          }
           sats[data].setSize(newSize);
           Satellite temp = sats[data];
-          for (int k = 0; k < splitVal; ++k) {
+          for (int k = 0; k < splitAmt; ++k) {
             float perigee = temp.getPerigee() - EARTH_RADIUS;
             float apogee = temp.getApogee() - EARTH_RADIUS;
-            randomShift(perigee, apogee);
+            // randomShift(perigee, apogee);
             sats.push_back(Satellite(perigee+EARTH_RADIUS, apogee+EARTH_RADIUS, temp.getPerigeeAngle(), temp.getLastTAnomaly(), newSize));
           }
         }
