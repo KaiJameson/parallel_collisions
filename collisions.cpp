@@ -114,12 +114,12 @@ int main(int argc, char **argv) {
     fstream fout;
     fout.open("sats.txt", ios::out);
     fout.close();
+    fout.open("sats.txt", ios::app);
+    fout << "{\"sats\":[\n";
     for (int i = 0; i < cycles; ++i) {
       map<string, SatId> locations; // map for detecting collision location
       map<string, bool> collisions; // map for detecting repeated collisions
-      fstream fout;
-      fout.open("sats.txt", ios::app);
-      fout << "\"["; 
+      fout << "["; 
       for (int j = 1; j < size; ++j) {
         // if (i > 270) {
           // cout << "waiting on rank#" << j << " to send size for cycle#" << i << endl;
@@ -166,9 +166,13 @@ int main(int argc, char **argv) {
         data = -1;
         MPI_Send(&data, 1, MPI_INT, sendRank, 0, MCW);
       }
-      fout << "]\"" << endl;
-      fout.close();
+      fout << "]";
+      if (i != cycles - 1) {
+        fout << ",\n";
+      }
     }
+    fout << "\n]}";
+    fout.close();
     cout << "There were " << collisionCount << " collisions in the year" << endl;
   }
   else {
