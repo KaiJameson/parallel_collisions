@@ -83,8 +83,8 @@ void Satellite::getPosition(int time, int position[]) {
     {-sin(m_perigeeAngle), cos(m_perigeeAngle)}
   };
   //apply rotation matrix and divide by size for collision information
-  position[0] = static_cast<int>(transformation[0][0]*x + transformation[1][0]*y);
-  position[1] = static_cast<int>(transformation[0][1]*x + transformation[1][1]*y);
+  position[0] = static_cast<int>(transformation[0][0]*x + transformation[1][0]*y) / m_size;
+  position[1] = static_cast<int>(transformation[0][1]*x + transformation[1][1]*y) / m_size;
 }
 
 
