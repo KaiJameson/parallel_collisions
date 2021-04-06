@@ -129,7 +129,7 @@ int main(int argc, char **argv) {
         for (int k = 0; k < numSats; ++k) {
           MPI_Recv(coords, 3, MPI_INT, j, 0, MCW, MPI_STATUS_IGNORE);
           string coordString = coordToString(coords);
-          fout << "[" << coords[0] << "," << coords[1] << "," << coords[2] << "]";
+          fout << "[" << coords[0] << "," << coords[1] << "," << coords[2] << "," << locations.count(coordString) << "]";
           if (j != size -1 || k != numSats-1) {
             fout << ",";            
           }

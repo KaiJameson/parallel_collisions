@@ -35,23 +35,43 @@ const run = async() => {
 	
     // draw the sats
     for (let i = 0; i < sats.length; i++) {
-        await delay(100);
+        await delay(200);
         let cycle = sats[i];
 
         // clear canvas and draw earth
         context.clearRect(0, 0, canvas.width, canvas.height);
         context.beginPath();
         context.arc(500, 500, 60, 0, 2*Math.PI);
+        context.strokeStyle = 'rgb(0, 0, 0)';
+        context.lineWidth = 1;
+        context.stroke();
 
-        // draw all satellites
+        // draw satellites
+        context.beginPath();
         for (let j = 0; j < cycle.length; ++j) {
             let sat = cycle[j];
-            let coords = newXY(sat[0], sat[1], 60);
-            let r = sat[2]/5;
-            context.moveTo(coords[0]+r, coords[1]);
-            context.arc(coords[0], coords[1], r, 0, 2*Math.PI);
+            if (sat[3] == 0) {
+                let coords = newXY(sat[0], sat[1], 60);
+                let r = sat[2]/5;
+                context.moveTo(coords[0]+r, coords[1]);
+                context.arc(coords[0], coords[1], r, 0, 2*Math.PI);
+            }
         }
-        context.lineWidth = 1;
+        context.strokeStyle = 'rgb(0, 0, 0)';
+        context.stroke();
+
+        // draw collisions
+        context.beginPath();
+        for (let j = 0; j < cycle.length; ++j) {
+            let sat = cycle[j];
+            if (sat[3] != 0) {
+                let coords = newXY(sat[0], sat[1], 60);
+                let r = sat[2];
+                context.moveTo(coords[0]+r, coords[1]);
+                context.arc(coords[0], coords[1], r, 0, 2*Math.PI);
+            }
+        }
+        context.strokeStyle = 'rgb(255, 0, 0)';
         context.stroke();
     }
     //context.strokeStyle = 'rgb(255, 255, 255)';
