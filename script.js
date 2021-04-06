@@ -40,12 +40,19 @@ const run = async() => {
 
         // clear canvas and draw earth
         context.clearRect(0, 0, canvas.width, canvas.height);
+        context.stokeStyle = 'rgb(0,0,0)';
+        context.fillStyle = 'rgb(0,0,0)';
+        context.fillRect(0,0,canvas.width,canvas.height);
+        context.strokeRect(0,0,canvas.width,canvas.height);
+
         context.beginPath();
         context.arc(500, 500, 60, 0, 2*Math.PI);
-        context.strokeStyle = 'rgb(0, 0, 0)';
+        context.closePath();
+        context.strokeStyle = 'rgb(0, 255, 0)';
+        context.fillStyle = 'rgb(0, 255, 0)';
         context.lineWidth = 1;
         context.stroke();
-
+        context.fill();
         // draw satellites
         context.beginPath();
         for (let j = 0; j < cycle.length; ++j) {
@@ -57,7 +64,8 @@ const run = async() => {
                 context.arc(coords[0], coords[1], r, 0, 2*Math.PI);
             }
         }
-        context.strokeStyle = 'rgb(0, 0, 0)';
+        context.strokeStyle = 'rgb(255, 255, 255)';
+        context.closePath();
         context.stroke();
 
         // draw collisions
@@ -71,6 +79,7 @@ const run = async() => {
                 context.arc(coords[0], coords[1], r, 0, 2*Math.PI);
             }
         }
+        context.closePath();
         context.strokeStyle = 'rgb(255, 0, 0)';
         context.stroke();
     }
