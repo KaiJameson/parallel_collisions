@@ -80,7 +80,7 @@ const run = async() => {
             }
         }
         context.closePath();
-        context.strokeStyle = 'rgb(255, 0, 0)';
+        context.strokeStyle = 'rgb(0, 255, 255)';
         context.stroke();
     }
     //context.strokeStyle = 'rgb(255, 255, 255)';
