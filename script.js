@@ -19,6 +19,14 @@ function initialize(input) {
     }
 }
 
+function newXY(x, y, r) {
+    let dist = Math.sqrt(x*x + y*y) + r;
+    let rad = Math.atan(y/x);
+    x = (x < 0 ? -dist*Math.cos(rad) : dist*Math.cos(rad));
+    y = dist*Math.sin(rad);
+    return [x+500, y+500];
+}
+
 const run = async() => {
     canvas = document.getElementById('canvas');
     context = canvas.getContext('2d');
@@ -27,7 +35,7 @@ const run = async() => {
 	
     // draw the sats
     for (let i = 0; i < sats.length; i++) {
-        await delay(500);
+        await delay(100);
         let cycle = sats[i];
 
         // clear canvas and draw earth
@@ -38,13 +46,10 @@ const run = async() => {
         // draw all satellites
         for (let j = 0; j < cycle.length; ++j) {
             let sat = cycle[j];
-            let x = sat[0] + 500;
-            x += (sat[0] < 0 ? -60 : 60);
-            let y = sat[1] + 500;
-            y += (sat[1] < 0 ? -60 : 60);
+            let coords = newXY(sat[0], sat[1], 60);
             let r = sat[2]/5;
-            context.moveTo(x+r, y);
-            context.arc(x, y, r, 0, 2*Math.PI);
+            context.moveTo(coords[0]+r, coords[1]);
+            context.arc(coords[0], coords[1], r, 0, 2*Math.PI);
         }
         context.lineWidth = 1;
         context.stroke();
